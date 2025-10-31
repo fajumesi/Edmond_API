@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+api:
+build:
+context: .
+dockerfile: Dockerfile
+container_name: ecfr-api
+ports:
+- "8000:8000"
+volumes:
+# Mount data directory for persistence
+- ./data:/app/data
+environment:
+- LOG_LEVEL=INFO
+- ENVIRONMENT=production
+restart: unless-stopped
+healthcheck:
+test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+interval: 30s
+timeout: 10s
+retries: 3
+start_period: 60s
+networks:
+- ecfr-network
+networks:
+ecfr-network:
+driver: bridge
+volumes:
+data:
+driver: local

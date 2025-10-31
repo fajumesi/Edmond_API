@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>eCFR Regulations API - Dashboard</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+padding: 20px;
+}
+.container {
+max-width: 1200px;
+margin: 0 auto;
+}
+.header {
+text-align: center;
+color: white;
+margin-bottom: 40px;
+padding: 40px 20px;
+}
+.header h1 {
+font-size: 3em;
+margin-bottom: 10px;
+text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.header p {
+font-size: 1.2em;
+opacity: 0.9;
+}
+.stats-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+gap: 20px;
+margin-bottom: 30px;
+}
+.stat-card {
+background: white;
+border-radius: 15px;
+padding: 25px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+.stat-card h3 {
+color: #667eea;
+font-size: 0.9em;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 10px;
+}
+.stat-card .value {
+font-size: 2.5em;
+font-weight: bold;
+color: #2d3748;
+margin-bottom: 5px;
+}
+.stat-card .label {
+color: #718096;
+font-size: 0.9em;
+}
+.main-content {
+background: white;
+border-radius: 15px;
+padding: 30px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+margin-bottom: 30px;
+}
+.section-title {
+font-size: 1.8em;
+color: #2d3748;
+margin-bottom: 20px;
+border-bottom: 3px solid #667eea;
+padding-bottom: 10px;
+}
+.agencies-grid {
+display: grid;
+gap: 15px;
+margin-top: 20px;
+}
+.agency-card {
+background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+border-radius: 10px;
+padding: 20px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+transition: all 0.3s ease;
+cursor: pointer;
+}
+.agency-card:hover {
+transform: translateX(5px);
+box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.agency-info {
+flex: 1;
+}
+.agency-name {
+font-size: 1.2em;
+font-weight: 600;
+color: #2d3748;
+margin-bottom: 5px;
+}
+.agency-code {
+color: #667eea;
+font-size: 0.9em;
+font-weight: 500;
+}
+.agency-size {
+background: white;
+padding: 10px 20px;
+border-radius: 20px;
+font-weight: bold;
+color: #667eea;
+font-size: 1.1em;
+}
+.quick-links {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 15px;
+margin-top: 30px;
+}
+.quick-link {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 20px;
+border-radius: 10px;
+text-decoration: none;
+text-align: center;
+font-weight: 600;
+transition: all 0.3s ease;
+box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.quick-link:hover {
+transform: translateY(-3px);
+box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+.quick-link .icon {
+font-size: 2em;
+margin-bottom: 10px;
+}
+.loading {
+text-align: center;
+padding: 40px;
+color: #667eea;
+font-size: 1.2em;
+}
+.spinner {
+border: 4px solid #f3f3f3;
+border-top: 4px solid #667eea;
+border-radius: 50%;
+width: 40px;
+height: 40px;
+animation: spin 1s linear infinite;
+margin: 20px auto;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.status-badge {
+display: inline-block;
+padding: 5px 15px;
+border-radius: 20px;
+font-size: 0.9em;
+font-weight: 600;
+}
+.status-healthy {
+background: #48bb78;
+color: white;
+}
+.status-degraded {
+background: #ed8936;
+color: white;
+}
+.footer {
+text-align: center;
+color: white;
+padding: 20px;
+opacity: 0.8;
+}
+@media (max-width: 768px) {
+.header h1 {
+font-size: 2em;
+}
+.stats-grid {
+grid-template-columns: 1fr;
+}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>📊 eCFR Regulations API</h1>
+<p>Real-time Federal Regulation Size Tracking</p>
+</div>
+<div class="stats-grid" id="stats">
+<div class="stat-card">
+<h3>System Status</h3>
+<div class="value"><span class="status-badge status-healthy">Loading...</span></div>
+<div class="label">Health Check</div>
+</div>
+<div class="stat-card">
+<h3>Total Agencies</h3>
+<div class="value" id="totalAgencies">--</div>
+<div class="label">Federal Agencies</div>
+</div>
+<div class="stat-card">
+<h3>Total Size</h3>
+<div class="value" id="totalSize">--</div>
+<div class="label">Megabytes</div>
+</div>
+<div class="stat-card">
+<h3>Last Updated</h3>
+<div class="value" id="lastUpdate" style="font-size: 1.2em;">--</div>
+<div class="label">Data Sync Time</div>
+</div>
+</div>
+<div class="main-content">
+<h2 class="section-title">📋 Federal Agencies by Regulation Size</h2>
+<div id="agenciesList" class="loading">
+<div class="spinner"></div>
+<p>Loading agency data...</p>
+</div>
+</div>
+<div class="main-content">
+<h2 class="section-title">🚀 Quick Access</h2>
+<div class="quick-links">
+<a href="/docs" class="quick-link">
+<div class="icon">📖</div>
+<div>API Documentation</div>
+</a>
+<a href="/api/agencies" class="quick-link">
+<div class="icon">📡</div>
+<div>JSON Endpoint</div>
+</a>
+<a href="/health" class="quick-link">
+<div class="icon">💚</div>
+<div>Health Check</div>
+</a>
+<a href="/api/stats" class="quick-link">
+<div class="icon">📈</div>
+<div>Statistics</div>
+</a>
+</div>
+</div>
+<div class="footer">
+<p>Powered by eCFR API • Updated Daily at 2 AM UTC</p>
+</div>
+</div>
+<script>
+async function loadData() {
+try {
+// Load health status
+const healthResponse = await fetch('/health');
+const healthData = await healthResponse.json();
+const statusBadge = document.querySelector('.status-badge');
+statusBadge.textContent = healthData.status.toUpperCase();
+statusBadge.className = `status-badge status-${healthData.status}`;
+// Load agency data
+const agenciesResponse = await fetch('/api/agencies');
+const agenciesData = await agenciesResponse.json();
+// Update stats
+document.getElementById('totalAgencies').textContent = agenciesData.total_agencies;
+document.getElementById('totalSize').textContent = agenciesData.total_size_mb.toFixed(2);
+// Format last update time
+const lastUpdate = new Date(agenciesData.last_sync);
+const timeAgo = getTimeAgo(lastUpdate);
+document.getElementById('lastUpdate').textContent = timeAgo;
+// Display agencies
+const agenciesList = document.getElementById('agenciesList');
+if (agenciesData.agencies && agenciesData.agencies.length > 0) {
+agenciesList.innerHTML = '<div class="agencies-grid">' + 
+agenciesData.agencies.slice(0, 10).map(agency => `
+<div class="agency-card">
+<div class="agency-info">
+<div class="agency-name">${agency.name}</div>
+<div class="agency-code">${agency.code}</div>
+</div>
+<div class="agency-size">${agency.regulation_size_mb.toFixed(2)} MB</div>
+</div>
+`).join('') +
+'</div>';
+if (agenciesData.agencies.length > 10) {
+agenciesList.innerHTML += `<p style="text-align: center; margin-top: 20px; color: #667eea;">
+<a href="/docs" style="color: #667eea; text-decoration: none; font-weight: 600;">
+View all ${agenciesData.agencies.length} agencies in API →
+</a>
+</p>`;
+}
+} else {
+agenciesList.innerHTML = '<p style="text-align: center; color: #718096;">No agency data available yet. Initial data fetch in progress...</p>';
+}
+} catch (error) {
+console.error('Error loading data:', error);
+document.getElementById('agenciesList').innerHTML = 
+'<p style="text-align: center; color: #e53e3e;">Error loading data. Please try again later.</p>';
+}
+}
+function getTimeAgo(date) {
+const seconds = Math.floor((new Date() - date) / 1000);
+if (seconds < 60) return 'Just now';
+if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+return date.toLocaleDateString();
+}
+// Load data on page load
+loadData();
+// Refresh data every 30 seconds
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>
